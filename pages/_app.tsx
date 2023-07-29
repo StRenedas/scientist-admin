@@ -1,13 +1,20 @@
 import '@/styles/globals.css'
 import type { AppProps } from 'next/app'
 import Layout from '@/layouts'
-import { Inter } from 'next/font/google'
+import { Roboto } from 'next/font/google'
 
-const inter = Inter({ subsets: ['latin'] })
+const roboto = Roboto({ subsets: ['latin'], weight: ['400', '700'] })
 export default function App({ Component, pageProps }: AppProps) {
   return (
-    <Layout>
-      <Component {...pageProps} />
-    </Layout>
+    <>
+      <style jsx global>{`
+        html {
+          font-family: ${roboto.style.fontFamily};
+        }
+      `}</style>
+      <Layout>
+        <Component {...pageProps} />
+      </Layout>
+    </>
   )
 }

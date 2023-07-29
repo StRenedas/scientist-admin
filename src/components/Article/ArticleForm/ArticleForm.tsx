@@ -8,6 +8,49 @@ import {
 import { DevTool } from '@hookform/devtools'
 import Api from '@/shared/api/Api'
 import { useEffect } from 'react'
+import { yupResolver } from '@hookform/resolvers/yup'
+import * as yup from 'yup'
+import {
+  Button,
+  TextField,
+  FormControlLabel,
+  Checkbox,
+  Box,
+  Stack,
+} from '@mui/material'
+
+const schema = yup.object({
+  title: yup.string().required('Введите название статьи'),
+  authors: yup.string().required('Введите авторов статьи'),
+  abstract: yup.string(),
+  published_journal: yup
+    .string()
+    .required('Введите название опубликовавшего статью журнала'),
+  published_year: yup
+    .string()
+    .required('Введите год публикации')
+    .matches(/^(19[0-9][0-9]|20[012][0-9])$/, 'Введите корректный год'),
+  published_volume: yup.string().nullable(),
+  published_number: yup
+    .string()
+    .required('Введите номер журнала, в котором опубликована статья'),
+  pages: yup
+    .string()
+    .required('Введите страницы, содержащие статью в опубликовавшем журнале'),
+  cite: yup.string(),
+  is_russian: yup.boolean().required(),
+  is_conference: yup.boolean().required(),
+  links: yup.object({
+    pdf: yup.string(),
+    wos: yup.string(),
+    scopus: yup.string(),
+    doi: yup.string(),
+    rinc: yup.string(),
+    vak: yup.string(),
+    rsci: yup.string(),
+  }),
+})
+
 const ArticleForm = () => {
   const {
     register,
@@ -17,9 +60,13 @@ const ArticleForm = () => {
     reset,
   } = useForm<IArticle>({
     mode: 'onTouched',
+    resolver: yupResolver<IArticle>(schema),
   })
 
-  const onSubmit: SubmitHandler<IArticle> = (data) => console.log(data)
+  const onSubmit: SubmitHandler<IArticle> = async (article) => {
+    const { data } = await Api.post('/articles', { ...article })
+    console.log(data)
+  }
 
   const onError: SubmitErrorHandler<IArticle> = (
     errors: FieldErrors<IArticle>,
@@ -32,117 +79,123 @@ const ArticleForm = () => {
   }, [isSubmitSuccessful, reset])
 
   return (
-    <>
+    <Box>
       <form onSubmit={handleSubmit(onSubmit, onError)} noValidate={true}>
-        <label htmlFor={'title'}>Название статьи</label>
-        <input
-          id={'title'}
-          defaultValue={''}
-          {...register('title', {
-            required: { value: true, message: 'Введите название статьи' },
-          })}
-        />
-        <p>{errors.title?.message}</p>
+        <Stack spacing={2}>
+          <TextField
+            label={'Название статьи'}
+            {...register('title')}
+            error={!!errors.title}
+            helperText={errors.title?.message}
+            fullWidth={true}
+          />
 
-        <label htmlFor={'authors'}>Авторы статьи</label>
-        <input
-          id={'authors'}
-          {...register('authors', {
-            required: { value: true, message: 'Введите авторов статьи' },
-          })}
-        />
-        <p>{errors.authors?.message}</p>
+          <TextField
+            label={'Авторы статьи'}
+            {...register('authors')}
+            error={!!errors.authors}
+            helperText={errors.authors?.message}
+            fullWidth={true}
+          />
 
-        <label htmlFor={'abstract'}>Abstract к статье</label>
-        <input id={'abstract'} {...register('abstract')} />
+          <TextField
+            label={'Введение к статье'}
+            {...register('abstract')}
+            multiline={true}
+            fullWidth={true}
+          />
 
-        <label htmlFor={'published_journal'}>Опубликовавший журнал</label>
-        <input
-          id={'published_journal'}
-          {...register('published_journal', {
-            required: {
-              value: true,
-              message: 'Введите название опубликовавшего статью журнала',
-            },
-          })}
-        />
-        <p>{errors.published_journal?.message}</p>
+          <TextField
+            label={'Пример цитирования'}
+            {...register('cite')}
+            multiline={true}
+            fullWidth={true}
+          />
 
-        <label htmlFor={'published_year'}>Год публикации</label>
-        <input
-          id={'published_year'}
-          type={'number'}
-          {...register('published_year', {
-            valueAsNumber: true,
-            required: { value: true, message: 'Введите год публикации' },
-          })}
-        />
-        <p>{errors.published_year?.message}</p>
+          <TextField
+            label={'Опубликовавший журнал'}
+            {...register('published_journal')}
+            error={!!errors.published_journal}
+            helperText={errors.published_journal?.message}
+            fullWidth={true}
+          />
 
-        <label htmlFor={'published_volume'}>Том журнала</label>
-        <input
-          id={'published_volume'}
-          type={'number'}
-          {...register('published_volume', { valueAsNumber: true })}
-        />
+          <Stack direction={'row'} spacing={2} justifyContent={'space-between'}>
+            <TextField
+              label={'Год публикации'}
+              type={'number'}
+              {...register('published_year')}
+              error={!!errors.published_year}
+              helperText={errors.published_year?.message}
+            />
 
-        <label htmlFor={'published_number'}>Номер журнала</label>
-        <input
-          id={'published_number'}
-          type={'number'}
-          {...register('published_number', {
-            valueAsNumber: true,
-            required: {
-              value: true,
-              message: 'Введите номер журнала, в котором опубликована статья',
-            },
-          })}
-        />
-        <p>{errors.published_number?.message}</p>
+            <TextField
+              label={'Том журнала'}
+              type={'number'}
+              {...register('published_volume')}
+            />
 
-        <label htmlFor={'pages'}>Страницы статьи в журнале</label>
-        <input
-          id={'pages'}
-          {...register('pages', {
-            required: {
-              value: true,
-              message:
-                'Введите страницы, содержащие статью в опубликовавшем журнале',
-            },
-          })}
-        />
-        <p>{errors.pages?.message}</p>
+            <TextField
+              label={'Номер журнала'}
+              type={'number'}
+              {...register('published_number')}
+              error={!!errors.published_number}
+              helperText={errors.published_number?.message}
+            />
 
-        <label htmlFor={'pdf'}>Ссылка на PDF</label>
-        <input id={'pdf'} {...register('links.pdf')} />
+            <TextField
+              label={'Страницы статьи в журнале'}
+              {...register('pages')}
+              error={!!errors.pages}
+              helperText={errors.pages?.message}
+            />
+          </Stack>
 
-        <label htmlFor={'wos'}>Ссылка на страницу статьи в WoS</label>
-        <input id={'wos'} {...register('links.wos')} />
+          <TextField
+            label={'Ссылка на PDF'}
+            {...register('links.pdf')}
+            fullWidth={true}
+          />
 
-        <label htmlFor={'is_russian'}>
-          Статья опубликована в российском журнале?
-        </label>
-        <input
-          id={'is_russian'}
-          {...register('is_russian', { required: true })}
-        />
-        {errors.is_russian && <span>This field is required</span>}
+          <TextField
+            label={'Ссылка на страницу статьи в WoS'}
+            {...register('links.wos')}
+            fullWidth={true}
+          />
 
-        <button type={'submit'} disabled={!isDirty || !isValid || isSubmitting}>
-          Сохранить статью
-        </button>
-        <button
+          <FormControlLabel
+            control={<Checkbox {...register('is_russian')} />}
+            label={'Статья опубликована в российском журнале?'}
+          />
+
+          <FormControlLabel
+            control={<Checkbox {...register('is_conference')} />}
+            label={'Представлена на конференции'}
+          />
+        </Stack>
+
+        <Button
           type={'button'}
           disabled={!isDirty}
+          variant={'contained'}
+          color={'error'}
           onClick={() => {
             reset()
           }}
         >
           Сбросить изменения
-        </button>
+        </Button>
+        <Button
+          type={'submit'}
+          disabled={!isDirty || !isValid || isSubmitting}
+          variant={'contained'}
+          color={'success'}
+        >
+          Сохранить статью
+        </Button>
       </form>
       <DevTool control={control} />
-    </>
+    </Box>
   )
 }
 

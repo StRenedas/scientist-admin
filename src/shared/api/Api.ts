@@ -12,7 +12,8 @@ export default class Api {
 
   static async post(url: string, payload: any) {
     try {
-      return await $axios.post(url, payload)
+      const { data } = await $axios.post(url, payload)
+      return data
     } catch (e) {
       console.error(e)
     }
