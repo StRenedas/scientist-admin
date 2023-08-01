@@ -1,8 +1,10 @@
 import { configureStore } from '@reduxjs/toolkit'
 import alertReducer from './alertSlice'
+import themeReducer from './themeSlice'
 export const store = configureStore({
   reducer: {
     alert: alertReducer,
+    theme: themeReducer,
   },
 })
 

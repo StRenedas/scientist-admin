@@ -1,14 +1,17 @@
 import { createSlice } from '@reduxjs/toolkit'
 import type { PayloadAction } from '@reduxjs/toolkit'
+import { AlertColor } from '@mui/material'
 
 export interface AlertState {
+  show: boolean
   text: string
-  color: string
+  color: AlertColor
 }
 
 const initialState: AlertState = {
+  show: false,
   text: '',
-  color: '',
+  color: 'info',
 }
 
 export const alertSlice = createSlice({
@@ -16,20 +19,21 @@ export const alertSlice = createSlice({
   initialState,
   reducers: {
     success: (state, action: PayloadAction<string>) => {
+      state.show = true
       state.color = 'success'
       state.text = action.payload
     },
     error: (state, action: PayloadAction<string>) => {
-      state.color = 'danger'
+      state.show = true
+      state.color = 'error'
       state.text = action.payload
     },
-    clear: (state) => {
-      state.color = ''
-      state.text = ''
+    close: (state) => {
+      state.show = false
     },
   },
 })
 
-export const { success, error, clear } = alertSlice.actions
+export const { success, error, close } = alertSlice.actions
 
 export default alertSlice.reducer

@@ -1,8 +1,12 @@
 import pikachu from '@/assets/images/pikachu.png'
 import Image from 'next/image'
 import { Box, Button, IconButton } from '@mui/material'
-import { AccountCircle, LightMode } from '@mui/icons-material'
+import { AccountCircle, DarkMode, LightMode } from '@mui/icons-material'
+import { useAppDispatch, useAppSelector } from '@/store/hooks'
+import { toggle } from '@/store/themeSlice'
 const Header = () => {
+  const dispatch = useAppDispatch()
+  const theme = useAppSelector((state) => state.theme)
   return (
     <header>
       <Box
@@ -15,8 +19,8 @@ const Header = () => {
       >
         <Image src={pikachu} alt={'Pikachuu~~'} width={40} height={40} />
         <Box>
-          <IconButton>
-            <LightMode />
+          <IconButton onClick={() => dispatch(toggle())}>
+            {theme.isDark ? <LightMode /> : <DarkMode />}
           </IconButton>
           <IconButton>
             <AccountCircle />

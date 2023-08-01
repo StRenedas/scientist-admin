@@ -7,7 +7,6 @@ import {
 } from 'react-hook-form'
 import { DevTool } from '@hookform/devtools'
 import Api from '@/shared/api/Api'
-import { useEffect } from 'react'
 import { yupResolver } from '@hookform/resolvers/yup'
 import * as yup from 'yup'
 import {
@@ -17,7 +16,11 @@ import {
   Checkbox,
   Box,
   Stack,
+  Snackbar,
+  Alert,
 } from '@mui/material'
+import { useAppDispatch, useAppSelector } from '@/store/hooks'
+import { close, error, success } from '@/store/alertSlice'
 
 const schema = yup.object({
   title: yup.string().required('Введите название статьи'),
@@ -52,6 +55,9 @@ const schema = yup.object({
 })
 
 const ArticleForm = () => {
+  const alert = useAppSelector((state) => state.alert)
+  const dispatch = useAppDispatch()
+
   const {
     register,
     handleSubmit,
@@ -64,19 +70,13 @@ const ArticleForm = () => {
   })
 
   const onSubmit: SubmitHandler<IArticle> = async (article) => {
-    const { data } = await Api.post('/articles', { ...article })
-    console.log(data)
+    const { statusCode, message } = await Api.post('/articles', { ...article })
+    statusCode ? dispatch(error(message)) : dispatch(success(message))
   }
 
   const onError: SubmitErrorHandler<IArticle> = (
     errors: FieldErrors<IArticle>,
   ) => console.log(errors)
-
-  useEffect(() => {
-    if (isSubmitSuccessful) {
-      reset()
-    }
-  }, [isSubmitSuccessful, reset])
 
   return (
     <Box>
@@ -175,7 +175,15 @@ const ArticleForm = () => {
           />
         </Stack>
 
-        <Stack mt={2} direction={'row'} justifyContent={'space-between'}>
+        <Stack mt={2} direction={'row'} spacing={2}>
+          <Button
+            type={'submit'}
+            disabled={!isDirty || !isValid || isSubmitting}
+            variant={'contained'}
+            color={'success'}
+          >
+            Сохранить
+          </Button>
           <Button
             type={'button'}
             disabled={!isDirty}
@@ -185,19 +193,20 @@ const ArticleForm = () => {
               reset()
             }}
           >
-            Сбросить изменения
-          </Button>
-          <Button
-            type={'submit'}
-            disabled={!isDirty || !isValid || isSubmitting}
-            variant={'contained'}
-            color={'success'}
-          >
-            Сохранить статью
+            Сбросить
           </Button>
         </Stack>
       </form>
       <DevTool control={control} />
+      <Snackbar
+        open={alert.show}
+        autoHideDuration={5000}
+        onClose={() => dispatch(close())}
+      >
+        <Alert onClose={() => dispatch(close())} severity={alert.color}>
+          {alert.text}
+        </Alert>
+      </Snackbar>
     </Box>
   )
 }
