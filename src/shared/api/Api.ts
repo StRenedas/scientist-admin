@@ -1,4 +1,5 @@
-import axios, { Axios } from 'axios'
+import axios from 'axios'
+import { Simulate } from 'react-dom/test-utils'
 const $axios = axios.create({ baseURL: process.env.NEXT_PUBLIC_BASE_URL })
 export default class Api {
   static async get(url: string) {
@@ -6,7 +7,12 @@ export default class Api {
       const { data } = await $axios.get(url)
       return data
     } catch (e) {
-      console.error(e)
+      if (axios.isAxiosError(e)) {
+        console.log(e.status)
+        console.error(e.response)
+      } else {
+        console.error(e)
+      }
     }
   }
 
@@ -15,7 +21,11 @@ export default class Api {
       const { data } = await $axios.post(url, payload)
       return data
     } catch (e) {
-      console.error(e)
+      if (axios.isAxiosError(e)) {
+        return e.response
+      } else {
+        console.log(e)
+      }
     }
   }
 

@@ -80,6 +80,7 @@ const ArticleForm = () => {
 
   return (
     <Box>
+      <h2>Добавление статьи</h2>
       <form onSubmit={handleSubmit(onSubmit, onError)} noValidate={true}>
         <Stack spacing={2}>
           <TextField
@@ -165,7 +166,7 @@ const ArticleForm = () => {
 
           <FormControlLabel
             control={<Checkbox {...register('is_russian')} />}
-            label={'Статья опубликована в российском журнале?'}
+            label={'Опубликована в российском журнале'}
           />
 
           <FormControlLabel
@@ -174,25 +175,27 @@ const ArticleForm = () => {
           />
         </Stack>
 
-        <Button
-          type={'button'}
-          disabled={!isDirty}
-          variant={'contained'}
-          color={'error'}
-          onClick={() => {
-            reset()
-          }}
-        >
-          Сбросить изменения
-        </Button>
-        <Button
-          type={'submit'}
-          disabled={!isDirty || !isValid || isSubmitting}
-          variant={'contained'}
-          color={'success'}
-        >
-          Сохранить статью
-        </Button>
+        <Stack mt={2} direction={'row'} justifyContent={'space-between'}>
+          <Button
+            type={'button'}
+            disabled={!isDirty}
+            variant={'contained'}
+            color={'error'}
+            onClick={() => {
+              reset()
+            }}
+          >
+            Сбросить изменения
+          </Button>
+          <Button
+            type={'submit'}
+            disabled={!isDirty || !isValid || isSubmitting}
+            variant={'contained'}
+            color={'success'}
+          >
+            Сохранить статью
+          </Button>
+        </Stack>
       </form>
       <DevTool control={control} />
     </Box>
